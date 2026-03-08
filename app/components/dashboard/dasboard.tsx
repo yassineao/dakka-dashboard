@@ -7,11 +7,11 @@ import BookingsTable  from "./OrderHistoryTable";
 
 export default function DashboardLayout() {
   return (
-    <div>
+    <div className=" bg-white ">
       <Topbar />
 
       <div className="flex overflow-hidden bg-white pt-16">
-        {/* <Sidebar /> */}
+        <Sidebar />
 
         <div className="relative h-full w-full overflow-y-auto bg-gray-50 lg:ml-64">
           <main>
