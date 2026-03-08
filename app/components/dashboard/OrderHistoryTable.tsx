@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
 
@@ -91,7 +91,7 @@ const initialRows: BookingRow[] = [
     description: "Corporate networking event.",
     duration: "4h",
   },
-   {
+  {
     id: "2bc6f4d2-0f8e-4bdff1f9f111004",
     created_at: "2026-03-09T15:40:00",
     start_date: "2026-03-28T19:00:00",
@@ -108,7 +108,7 @@ const initialRows: BookingRow[] = [
     description: "Corporate networking event.",
     duration: "4h",
   },
-   {
+  {
     id: "2bc6f4d2-0f8ef9f111004",
     created_at: "2026-03-09T15:40:00",
     start_date: "2026-03-28T19:00:00",
@@ -125,7 +125,24 @@ const initialRows: BookingRow[] = [
     description: "Corporate networking event.",
     duration: "4h",
   },
-   {
+  {
+    id: "2bc6f4ef9f111004",
+    created_at: "2026-03-09T15:40:00",
+    start_date: "2026-03-28T19:00:00",
+    end_date: "2026-03-28T23:00:00",
+    updated_at: "2026-03-09T16:00:00",
+    status: "cancelled",
+    exact_location: "Hafenstraße 1, Hamburg",
+    hall_or_location: "Loft B",
+    name: "Lukas Fischer",
+    occasion: "Corporate",
+    package_name: "Business",
+    booking_type: "Company",
+    region: "Hamburg",
+    description: "Corporate networking event.",
+    duration: "4h",
+  },
+  {
     id: "2bc6f4d2-0f8e-4bsdf1f9f111004",
     created_at: "2026-03-09T15:40:00",
     start_date: "2026-03-28T19:00:00",
@@ -240,11 +257,62 @@ function InfoItem({ label, value }: { label: string; value: string }) {
   );
 }
 
+function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-white px-4 py-3">
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Zurück
+      </button>
+
+      <div className="text-sm text-slate-600">
+        Seite {currentPage} von {totalPages}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Weiter
+      </button>
+    </div>
+  );
+}
+
 export default function BookingsTable() {
   const [rows, setRows] = useState<BookingRow[]>(initialRows);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">("all");
   const [saving, setSaving] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  useEffect(() => {
+    const updateRowsPerPage = () => {
+      setRowsPerPage(window.innerWidth < 768 ? 5 : 5);
+    };
+
+    updateRowsPerPage();
+    window.addEventListener("resize", updateRowsPerPage);
+
+    return () => window.removeEventListener("resize", updateRowsPerPage);
+  }, []);
 
   const filteredRows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -309,6 +377,23 @@ export default function BookingsTable() {
     };
   }, [rows, search]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter, rowsPerPage]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedRows = useMemo(() => {
+    const start = (currentPage - 1) * rowsPerPage;
+    return filteredRows.slice(start, start + rowsPerPage);
+  }, [filteredRows, currentPage, rowsPerPage]);
+
   function updateStatus(id: string, status: BookingStatus) {
     setRows((prev) =>
       prev.map((row) =>
@@ -327,14 +412,6 @@ export default function BookingsTable() {
     try {
       setSaving(true);
 
-      // Replace with your real API or Supabase save logic.
-      // Example:
-      // await fetch("/api/bookings/status", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(rows),
-      // });
-
       await new Promise((resolve) => setTimeout(resolve, 700));
       alert("Änderungen gespeichert.");
     } catch (error) {
@@ -346,7 +423,7 @@ export default function BookingsTable() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl  ">
+    <div className="mx-auto w-full max-w-7xl">
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -410,7 +487,7 @@ export default function BookingsTable() {
         </div>
 
         <div className="block space-y-4 p-4 md:hidden">
-          {filteredRows.map((row) => (
+          {paginatedRows.map((row) => (
             <div
               key={row.id}
               className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
@@ -470,7 +547,7 @@ export default function BookingsTable() {
             </div>
           ))}
 
-          {filteredRows.length === 0 && (
+          {paginatedRows.length === 0 && (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
               Keine Einträge gefunden.
             </div>
@@ -484,6 +561,7 @@ export default function BookingsTable() {
                 <tr className="[&>th]:px-4 [&>th]:py-3">
                   <th>Name</th>
                   <th>Status</th>
+                  <th>Status ändern</th>
                   <th>Occasion</th>
                   <th>Package</th>
                   <th>Booking Type</th>
@@ -493,22 +571,18 @@ export default function BookingsTable() {
                   <th>Start</th>
                   <th>End</th>
                   <th>Duration</th>
-                  {/* <th>Created</th>
-                  <th>Updated</th> */}
                   <th>Description</th>
-                  <th>Status ändern</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-slate-200">
-                {filteredRows.map((row) => (
+                {paginatedRows.map((row) => (
                   <tr
                     key={row.id}
                     className="align-top transition-colors odd:bg-white even:bg-slate-50 hover:bg-slate-100"
                   >
                     <td className="px-4 py-3 text-slate-700">
                       <div className="font-semibold text-slate-900">{row.name}</div>
-                    
                     </td>
 
                     <td className="px-4 py-3 text-slate-700">
@@ -520,33 +594,7 @@ export default function BookingsTable() {
                         {labelizeStatus(row.status)}
                       </span>
                     </td>
-
-                    <td className="px-4 py-3 text-slate-700" >{row.occasion}</td>
-                    <td className="px-4 py-3 text-slate-700">{row.package_name}</td>
-                    <td className="px-4 py-3 text-slate-700">{row.booking_type}</td>
-                    <td className="px-4 py-3 text-slate-700">{row.region}</td>
-                    <td className="px-4 py-3 text-slate-700">{row.hall_or_location}</td>
-                    <td className="px-4 py-3 text-slate-700">{row.exact_location}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">
-                      {formatDateTime(row.start_date)}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">
-                      {formatDateTime(row.end_date)}
-                    </td>
-                    <td className="px-4 py-3 text-slate-700">{row.duration}</td>
-                    {/* <td className="px-4 py-3 whitespace-nowrap">
-                      {formatDateTime(row.created_at)}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {formatDateTime(row.updated_at)}
-                    </td> */}
-                    <td className="min-w-[260px] px-4 py-3">
-                      <div className="max-w-[260px] whitespace-normal text-slate-700">
-                        {row.description}
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-3 text-slate-700">
+                       <td className="px-4 py-3 text-slate-700">
                       <select
                         value={row.status}
                         onChange={(e) =>
@@ -561,10 +609,30 @@ export default function BookingsTable() {
                         ))}
                       </select>
                     </td>
+                    <td className="px-4 py-3 text-slate-700">{row.occasion}</td>
+                    <td className="px-4 py-3 text-slate-700">{row.package_name}</td>
+                    <td className="px-4 py-3 text-slate-700">{row.booking_type}</td>
+                    <td className="px-4 py-3 text-slate-700">{row.region}</td>
+                    <td className="px-4 py-3 text-slate-700">{row.hall_or_location}</td>
+                    <td className="px-4 py-3 text-slate-700">{row.exact_location}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">
+                      {formatDateTime(row.start_date)}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">
+                      {formatDateTime(row.end_date)}
+                    </td>
+                    <td className="px-4 py-3 text-slate-700">{row.duration}</td>
+                    <td className="min-w-[260px] px-4 py-3">
+                      <div className="max-w-[260px] whitespace-normal text-slate-700">
+                        {row.description}
+                      </div>
+                    </td>
+
+                 
                   </tr>
                 ))}
 
-                {filteredRows.length === 0 && (
+                {paginatedRows.length === 0 && (
                   <tr>
                     <td
                       colSpan={15}
@@ -578,6 +646,12 @@ export default function BookingsTable() {
             </table>
           </div>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
 
         <div className="border-t border-slate-200 bg-white p-4">
           <div className="flex justify-end">
