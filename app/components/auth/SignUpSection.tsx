@@ -62,8 +62,8 @@ export default function LoginPage() {
                     {/* Logo */}
                     <div className="text-center">
                       <img
-                        className="mx-auto w-48"
-                        src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/lotus.webp"
+                        className="mx-auto w-17"
+                        src="/Logo.png"
                         alt="logo"
                       />
                       <h4 className="mb-12 mt-1 pb-1 text-xl font-semibold">
@@ -120,7 +120,7 @@ export default function LoginPage() {
                           className="mb-3 inline-block w-full rounded px-6 pb-2.5 pt-2 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:opacity-90 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
                           style={{
                             background:
-                              "linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593)",
+                              "linear-gradient(to right, #000000, #5d6b1e, #D4AF37)",
                           }}
                         >
                           {loading ? "Logging in..." : "Log in"}
@@ -140,7 +140,7 @@ export default function LoginPage() {
                   className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-bl-none lg:rounded-r-lg"
                   style={{
                     background:
-                      "linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593)",
+                      "linear-gradient(c)",
                   }}
                 >
                   <div className="px-6 py-10 text-white md:mx-6 md:p-12">
