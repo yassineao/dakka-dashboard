@@ -2,7 +2,27 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+type BookingStatus = "AUSSTEHEND" | "BESTÄTIGT" | "completed" | "STORNIERT";
+
+type TerminApi = {
+  id: string;
+  createdAt: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  updatedAt: string | null;
+  status: string | null;
+  exactLocation: string | null;
+  hallOrLocation: string | null;
+  name: string | null;
+  occasion: string | null;
+  packageName: string | null;
+  bookingType: string | null;
+  region: string | null;
+  description: string | null;
+  duration: string | null;
+};
 
 type BookingRow = {
   id: string;
@@ -22,154 +42,19 @@ type BookingRow = {
   duration: string;
 };
 
-const initialRows: BookingRow[] = [
-  {
-    id: "7f4a2b6e-1d21-4d8d-92b1-1c8b0d401001",
-    created_at: "2026-03-08T09:00:00",
-    start_date: "2026-03-15T14:00:00",
-    end_date: "2026-03-15T18:00:00",
-    updated_at: "2026-03-08T10:00:00",
-    status: "pending",
-    exact_location: "Musterstraße 12, Berlin",
-    hall_or_location: "Hall A",
-    name: "Anna Schmidt",
-    occasion: "Birthday",
-    package_name: "Gold",
-    booking_type: "Private",
-    region: "Berlin",
-    description: "Birthday event with decoration package.",
-    duration: "4h",
-  },
-  {
-    id: "0db4b8a2-3f4d-4ef9-8f7b-3b1d92321002",
-    created_at: "2026-03-08T11:30:00",
-    start_date: "2026-03-20T16:00:00",
-    end_date: "2026-03-20T22:00:00",
-    updated_at: "2026-03-08T12:15:00",
-    status: "confirmed",
-    exact_location: "Altmarkt 3, Dresden",
-    hall_or_location: "Main Hall",
-    name: "Max Müller",
-    occasion: "Wedding",
-    package_name: "Premium",
-    booking_type: "Event",
-    region: "Sachsen",
-    description: "Wedding reception with full service.",
-    duration: "6h",
-  },
-  {
-    id: "1aa2c7f0-6409-4908-95c0-01003",
-    created_at: "2026-03-09T08:20:00",
-    start_date: "2026-03-25T10:00:00",
-    end_date: "2026-03-25T13:00:00",
-    updated_at: "2026-03-09T09:05:00",
-    status: "completed",
-    exact_location: "Rheinweg 8, Köln",
-    hall_or_location: "Room 2",
-    name: "Julia Weber",
-    occasion: "Baby Shower",
-    package_name: "Standard",
-    booking_type: "Private",
-    region: "NRW",
-    description: "Morning event with brunch.",
-    duration: "3h",
-  },
-  {
-    id: "2bcd2-0f8e-4bdf-9d26-df1f9f111004",
-    created_at: "2026-03-09T15:40:00",
-    start_date: "2026-03-28T19:00:00",
-    end_date: "2026-03-28T23:00:00",
-    updated_at: "2026-03-09T16:00:00",
-    status: "cancelled",
-    exact_location: "Hafenstraße 1, Hamburg",
-    hall_or_location: "Loft B",
-    name: "Lukas Fischer",
-    occasion: "Corporate",
-    package_name: "Business",
-    booking_type: "Company",
-    region: "Hamburg",
-    description: "Corporate networking event.",
-    duration: "4h",
-  },
-  {
-    id: "2bc6f4d2-0f8e-4bdff1f9f111004",
-    created_at: "2026-03-09T15:40:00",
-    start_date: "2026-03-28T19:00:00",
-    end_date: "2026-03-28T23:00:00",
-    updated_at: "2026-03-09T16:00:00",
-    status: "cancelled",
-    exact_location: "Hafenstraße 1, Hamburg",
-    hall_or_location: "Loft B",
-    name: "Lukas Fischer",
-    occasion: "Corporate",
-    package_name: "Business",
-    booking_type: "Company",
-    region: "Hamburg",
-    description: "Corporate networking event.",
-    duration: "4h",
-  },
-  {
-    id: "2bc6f4d2-0f8ef9f111004",
-    created_at: "2026-03-09T15:40:00",
-    start_date: "2026-03-28T19:00:00",
-    end_date: "2026-03-28T23:00:00",
-    updated_at: "2026-03-09T16:00:00",
-    status: "cancelled",
-    exact_location: "Hafenstraße 1, Hamburg",
-    hall_or_location: "Loft B",
-    name: "Lukas Fischer",
-    occasion: "Corporate",
-    package_name: "Business",
-    booking_type: "Company",
-    region: "Hamburg",
-    description: "Corporate networking event.",
-    duration: "4h",
-  },
-  {
-    id: "2bc6f4ef9f111004",
-    created_at: "2026-03-09T15:40:00",
-    start_date: "2026-03-28T19:00:00",
-    end_date: "2026-03-28T23:00:00",
-    updated_at: "2026-03-09T16:00:00",
-    status: "cancelled",
-    exact_location: "Hafenstraße 1, Hamburg",
-    hall_or_location: "Loft B",
-    name: "Lukas Fischer",
-    occasion: "Corporate",
-    package_name: "Business",
-    booking_type: "Company",
-    region: "Hamburg",
-    description: "Corporate networking event.",
-    duration: "4h",
-  },
-  {
-    id: "2bc6f4d2-0f8e-4bsdf1f9f111004",
-    created_at: "2026-03-09T15:40:00",
-    start_date: "2026-03-28T19:00:00",
-    end_date: "2026-03-28T23:00:00",
-    updated_at: "2026-03-09T16:00:00",
-    status: "cancelled",
-    exact_location: "Hafenstraße 1, Hamburg",
-    hall_or_location: "Loft B",
-    name: "Lukas Fischer",
-    occasion: "Corporate",
-    package_name: "Business",
-    booking_type: "Company",
-    region: "Hamburg",
-    description: "Corporate networking event.",
-    duration: "4h",
-  },
-];
-
 const statusOptions: BookingStatus[] = [
-  "pending",
-  "confirmed",
+  "AUSSTEHEND",
+  "BESTÄTIGT",
   "completed",
-  "cancelled",
+  "STORNIERT",
 ];
 
 function formatDateTime(value: string) {
+  if (!value) return "-";
+
   const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
   return date.toLocaleString("de-DE", {
     year: "numeric",
     month: "2-digit",
@@ -181,13 +66,13 @@ function formatDateTime(value: string) {
 
 function statusClasses(status: BookingStatus) {
   switch (status) {
-    case "pending":
+    case "AUSSTEHEND":
       return "bg-amber-50 text-amber-700 ring-amber-200";
-    case "confirmed":
+    case "BESTÄTIGT":
       return "bg-blue-50 text-blue-700 ring-blue-200";
     case "completed":
       return "bg-emerald-50 text-emerald-700 ring-emerald-200";
-    case "cancelled":
+    case "STORNIERT":
       return "bg-rose-50 text-rose-700 ring-rose-200";
     default:
       return "bg-slate-50 text-slate-700 ring-slate-200";
@@ -196,17 +81,58 @@ function statusClasses(status: BookingStatus) {
 
 function labelizeStatus(status: BookingStatus) {
   switch (status) {
-    case "pending":
-      return "Pending";
-    case "confirmed":
-      return "Confirmed";
+    case "AUSSTEHEND":
+      return "AUSSTEHEND";
+    case "BESTÄTIGT":
+      return "BESTÄTIGT";
     case "completed":
       return "Completed";
-    case "cancelled":
-      return "Cancelled";
+    case "STORNIERT":
+      return "STORNIERT";
     default:
       return status;
   }
+}
+
+function mapApiStatus(status: string | null): BookingStatus {
+  switch (status?.trim().toUpperCase()) {
+    case "BESTÄTIGT":
+    case "BESTÄTIGT":
+      return "BESTÄTIGT";
+    case "AUSSTEHEND":
+    case "AUSSTEHEND":
+      return "AUSSTEHEND";
+    case "ABGESCHLOSSEN":
+    case "COMPLETED":
+      return "completed";
+    case "STORNIERT":
+    case "STORNIERT":
+      return "STORNIERT";
+    default:
+      return "AUSSTEHEND";
+  }
+}
+
+function mapTerminToBookingRow(termin: TerminApi): BookingRow {
+  const now = new Date().toISOString();
+
+  return {
+    id: termin.id,
+    created_at: termin.createdAt ?? "null",
+    start_date: termin.start_date ?? "null",
+    end_date: termin.end_date ?? "null",
+    updated_at: termin.updatedAt ?? "null",
+    status: mapApiStatus(termin.status),
+    exact_location: termin.exactLocation ?? "-",
+    hall_or_location: termin.hallOrLocation ?? "-",
+    name: termin.name ?? "-",
+    occasion: termin.occasion ?? "-",
+    package_name: termin.packageName ?? "-",
+    booking_type: termin.bookingType ?? "-",
+    region: termin.region ?? "-",
+    description: termin.description ?? "-",
+    duration: termin.duration ?? "-",
+  };
 }
 
 function StatusFilterButton({
@@ -252,7 +178,7 @@ function InfoItem({ label, value }: { label: string; value: string }) {
       <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
         {label}
       </div>
-      <div className="mt-1 break-words text-sm text-slate-900">{value}</div>
+      <div className="mt-1 break-words text-sm text-slate-900">{value || "-"}</div>
     </div>
   );
 }
@@ -296,12 +222,49 @@ function Pagination({
 }
 
 export default function BookingsTable() {
-  const [rows, setRows] = useState<BookingRow[]>(initialRows);
+  const [rows, setRows] = useState<BookingRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">("all");
   const [saving, setSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  useEffect(() => {
+    const loadTermine = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        if (!API_BASE_URL) {
+          throw new Error("NEXT_PUBLIC_API_BASE_URL is not set");
+        }
+
+        const res = await fetch(`${API_BASE_URL}/api/termine`, {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error(`Request failed: ${res.status}`);
+        }
+
+        const text = await res.text();
+        const data: TerminApi[] = text ? JSON.parse(text) : [];
+        console.log("Raw API response:", data);
+        setRows(Array.isArray(data) ? data.map(mapTerminToBookingRow) : []);
+        console.log("Geladene Termine:", data);
+      } catch (err) {
+        console.error("Error loading termine", err);
+        setError(err instanceof Error ? err.message : "Unknown error");
+        setRows([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTermine();
+  }, []);
 
   useEffect(() => {
     const updateRowsPerPage = () => {
@@ -370,10 +333,10 @@ export default function BookingsTable() {
 
     return {
       all: baseRows.length,
-      pending: baseRows.filter((r) => r.status === "pending").length,
-      confirmed: baseRows.filter((r) => r.status === "confirmed").length,
+      AUSSTEHEND: baseRows.filter((r) => r.status === "AUSSTEHEND").length,
+      BESTÄTIGT: baseRows.filter((r) => r.status === "BESTÄTIGT").length,
       completed: baseRows.filter((r) => r.status === "completed").length,
-      cancelled: baseRows.filter((r) => r.status === "cancelled").length,
+      STORNIERT: baseRows.filter((r) => r.status === "STORNIERT").length,
     };
   }, [rows, search]);
 
@@ -411,7 +374,6 @@ export default function BookingsTable() {
   async function handleSave() {
     try {
       setSaving(true);
-
       await new Promise((resolve) => setTimeout(resolve, 700));
       alert("Änderungen gespeichert.");
     } catch (error) {
@@ -420,6 +382,28 @@ export default function BookingsTable() {
     } finally {
       setSaving(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-600">Lade Termine...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 shadow-sm">
+          <p className="text-sm font-medium text-red-700">
+            Fehler beim Laden: {error}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -456,16 +440,16 @@ export default function BookingsTable() {
               onClick={() => setStatusFilter("all")}
             />
             <StatusFilterButton
-              label="Pending"
-              count={counts.pending}
-              active={statusFilter === "pending"}
-              onClick={() => setStatusFilter("pending")}
+              label="AUSSTEHEND"
+              count={counts.AUSSTEHEND}
+              active={statusFilter === "AUSSTEHEND"}
+              onClick={() => setStatusFilter("AUSSTEHEND")}
             />
             <StatusFilterButton
-              label="Confirmed"
-              count={counts.confirmed}
-              active={statusFilter === "confirmed"}
-              onClick={() => setStatusFilter("confirmed")}
+              label="BESTÄTIGT"
+              count={counts.BESTÄTIGT}
+              active={statusFilter === "BESTÄTIGT"}
+              onClick={() => setStatusFilter("BESTÄTIGT")}
             />
             <StatusFilterButton
               label="Completed"
@@ -474,10 +458,10 @@ export default function BookingsTable() {
               onClick={() => setStatusFilter("completed")}
             />
             <StatusFilterButton
-              label="Cancelled"
-              count={counts.cancelled}
-              active={statusFilter === "cancelled"}
-              onClick={() => setStatusFilter("cancelled")}
+              label="STORNIERT"
+              count={counts.STORNIERT}
+              active={statusFilter === "STORNIERT"}
+              onClick={() => setStatusFilter("STORNIERT")}
             />
           </div>
         </div>
@@ -594,7 +578,8 @@ export default function BookingsTable() {
                         {labelizeStatus(row.status)}
                       </span>
                     </td>
-                       <td className="px-4 py-3 text-slate-700">
+
+                    <td className="px-4 py-3 text-slate-700">
                       <select
                         value={row.status}
                         onChange={(e) =>
@@ -609,16 +594,17 @@ export default function BookingsTable() {
                         ))}
                       </select>
                     </td>
+
                     <td className="px-4 py-3 text-slate-700">{row.occasion}</td>
                     <td className="px-4 py-3 text-slate-700">{row.package_name}</td>
                     <td className="px-4 py-3 text-slate-700">{row.booking_type}</td>
                     <td className="px-4 py-3 text-slate-700">{row.region}</td>
                     <td className="px-4 py-3 text-slate-700">{row.hall_or_location}</td>
                     <td className="px-4 py-3 text-slate-700">{row.exact_location}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">
+                    <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                       {formatDateTime(row.start_date)}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">
+                    <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                       {formatDateTime(row.end_date)}
                     </td>
                     <td className="px-4 py-3 text-slate-700">{row.duration}</td>
@@ -627,15 +613,13 @@ export default function BookingsTable() {
                         {row.description}
                       </div>
                     </td>
-
-                 
                   </tr>
                 ))}
 
                 {paginatedRows.length === 0 && (
                   <tr>
                     <td
-                      colSpan={15}
+                      colSpan={13}
                       className="px-4 py-10 text-center text-sm text-slate-500"
                     >
                       Keine Einträge gefunden.
