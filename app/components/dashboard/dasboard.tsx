@@ -13,7 +13,7 @@ export default function DashboardLayout() {
       <div className="flex overflow-hidden bg-white pt-16">
         <Sidebar />
 
-        <div className="relative h-full w-full overflow-y-auto bg-gray-50 lg:ml-64">
+        <div className="relative h-full w-full overflow-y-auto  lg:ml-64">
           <main>
             <div className="px-4 pt-6">
               <div className="grid w-full grid-cols-1 gap-4">

@@ -11,7 +11,8 @@ export default function Sidebar() {
       <div className="px-3">
         <div className="mb-6 px-2">
           <a href="#" className="block text-xl font-medium tracking-tighter text-gray-900">
-            wickedblocks
+            <img src="/Logo.png" className="max-w-10" alt="" />
+            Dakka Dashboard
           </a>
         </div>
 

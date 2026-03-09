@@ -522,7 +522,7 @@ export default function BookingsTable() {
               </p>
             </div>
 
-            <div className="w-full lg:max-w-sm">
+            <div className="w-full lg:max-w-sm text-slate-900">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-
+import { isAuthenticated, removeToken } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 export default function Topbar() {
   const [scrolled, setScrolled] = useState(false);
-
+const router = useRouter();
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -12,7 +13,10 @@ export default function Topbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+ function handleLogout() {
+    removeToken();
+    router.replace("/auth/signin");
+  }
   return (
     <nav
       className={`fixed z-30 w-full transition-all duration-300 
@@ -54,13 +58,13 @@ export default function Topbar() {
 
           {/* Right buttons */}
           <div className="hidden lg:flex items-center gap-4 ml-auto ">
-            <button className="h-10 px-4 text-slate-700 font-medium text-slate-200 rounded-md border border-transparent hover:bg-black/20 transition">
-              Log in
+            <button className="h-10 px-4 text-slate-700 font-medium text-slate-200 rounded-md border border-transparent hover:bg-black/20 transition " onClick={handleLogout}>
+              Log out
             </button>
 
-            <button className="h-10 px-4 text-slate-700 font-medium rounded-md border border-transparent text-slate-700 hover:bg-black/20 transition">
+            {/* <button className="h-10 px-4 text-slate-700 font-medium rounded-md border border-transparent text-slate-700 hover:bg-black/20 transition">
               Start now
-            </button>
+            </button> */}
           </div>
 
           {/* Mobile menu */}
