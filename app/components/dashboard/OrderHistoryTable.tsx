@@ -1,16 +1,17 @@
 "use client";
 
+import { stat } from "fs";
 import { useEffect, useMemo, useState } from "react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-type BookingStatus = "AUSSTEHEND" | "BESTÄTIGT" | "completed" | "STORNIERT";
+type BookingStatus = "AUSSTEHEND" | "BESTÄTIGT" | "STORNIERT";
 
 type TerminApi = {
   id: string;
   createdAt: string | null;
-  start_date: string | null;
-  end_date: string | null;
+  startDate: string | null;
+  endDate: string | null;
   updatedAt: string | null;
   status: string | null;
   exactLocation: string | null;
@@ -27,8 +28,8 @@ type TerminApi = {
 type BookingRow = {
   id: string;
   created_at: string;
-  start_date: string;
-  end_date: string;
+  startDate: string;
+  endDate: string;
   updated_at: string;
   status: BookingStatus;
   exact_location: string;
@@ -45,7 +46,6 @@ type BookingRow = {
 const statusOptions: BookingStatus[] = [
   "AUSSTEHEND",
   "BESTÄTIGT",
-  "completed",
   "STORNIERT",
 ];
 
@@ -70,8 +70,7 @@ function statusClasses(status: BookingStatus) {
       return "bg-amber-50 text-amber-700 ring-amber-200";
     case "BESTÄTIGT":
       return "bg-blue-50 text-blue-700 ring-blue-200";
-    case "completed":
-      return "bg-emerald-50 text-emerald-700 ring-emerald-200";
+  
     case "STORNIERT":
       return "bg-rose-50 text-rose-700 ring-rose-200";
     default:
@@ -85,8 +84,7 @@ function labelizeStatus(status: BookingStatus) {
       return "AUSSTEHEND";
     case "BESTÄTIGT":
       return "BESTÄTIGT";
-    case "completed":
-      return "Completed";
+   
     case "STORNIERT":
       return "STORNIERT";
     default:
@@ -103,8 +101,7 @@ function mapApiStatus(status: string | null): BookingStatus {
     case "AUSSTEHEND":
       return "AUSSTEHEND";
     case "ABGESCHLOSSEN":
-    case "COMPLETED":
-      return "completed";
+  
     case "STORNIERT":
     case "STORNIERT":
       return "STORNIERT";
@@ -119,8 +116,8 @@ function mapTerminToBookingRow(termin: TerminApi): BookingRow {
   return {
     id: termin.id,
     created_at: termin.createdAt ?? "null",
-    start_date: termin.start_date ?? "null",
-    end_date: termin.end_date ?? "null",
+    startDate: termin.startDate ?? "null",
+    endDate: termin.endDate ?? "null",
     updated_at: termin.updatedAt ?? "null",
     status: mapApiStatus(termin.status),
     exact_location: termin.exactLocation ?? "-",
@@ -223,6 +220,7 @@ function Pagination({
 
 export default function BookingsTable() {
   const [rows, setRows] = useState<BookingRow[]>([]);
+  const [rowsUpdated, setRowsUpdated] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
@@ -335,7 +333,6 @@ export default function BookingsTable() {
       all: baseRows.length,
       AUSSTEHEND: baseRows.filter((r) => r.status === "AUSSTEHEND").length,
       BESTÄTIGT: baseRows.filter((r) => r.status === "BESTÄTIGT").length,
-      completed: baseRows.filter((r) => r.status === "completed").length,
       STORNIERT: baseRows.filter((r) => r.status === "STORNIERT").length,
     };
   }, [rows, search]);
@@ -358,7 +355,37 @@ export default function BookingsTable() {
   }, [filteredRows, currentPage, rowsPerPage]);
 
   function updateStatus(id: string, status: BookingStatus) {
+    
+    
+     setRowsUpdated((prev) => {
+      const exists = prev.some((row) => row.id === id);
+      if (exists) {
+        
+        return prev.map((row) =>
+          row.id === id
+            ? {
+                ...row,
+                status,
+                updated_at: new Date().toISOString(),
+              }
+            : row
+        );
+        
+      } else {
+        
+        const foundRow = rows.find((r) => r.id === id);
+        if (foundRow) {
+          console.log("Hinzufügen zur Aktualisierungsliste:", { ...foundRow, status },"prev:", prev);
+          return [...prev, { ...foundRow, status, updated_at: new Date().toISOString() }];
+        }
+        
+        return prev;
+     
+      }
+    });
+    
     setRows((prev) =>
+      
       prev.map((row) =>
         row.id === id
           ? {
@@ -368,25 +395,68 @@ export default function BookingsTable() {
             }
           : row
       )
+      
     );
+    
+   
+
+
   }
 
   async function handleSave() {
-    try {
-      setSaving(true);
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      alert("Änderungen gespeichert.");
-    } catch (error) {
-      console.error(error);
-      alert("Speichern fehlgeschlagen.");
-    } finally {
-      setSaving(false);
+  try {
+    console.log("Zu speichernde Zeilen:", rowsUpdated);
+    setSaving(true);
+
+    if (!API_BASE_URL) {
+      throw new Error("NEXT_PUBLIC_API_BASE_URL is not set");
     }
+
+    const payload = rowsUpdated.map((row) => ({
+      id: row.id,
+      title: row.name,
+      status: row.status,
+      exactLocation: row.exact_location,
+      hallOrLocation: row.hall_or_location,
+      occasion: row.occasion,
+      packageName: row.package_name,
+      bookingType: row.booking_type,
+      region: row.region,
+      description: row.description,
+      duration: row.duration,
+    }));
+
+    const res = await fetch(`${API_BASE_URL}/api/termine/batch`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || `Request failed: ${res.status}`);
+    }
+    console.log("Erfolgreich gespeichert.", "Serverantwort:", await res.text(),);
+    console.log("payload:", payload);
+    alert("Änderungen gespeichert.");
+    window.location.reload();
+  } catch (error) {
+    console.error("Speichern fehlgeschlagen:", error);
+    alert(
+      error instanceof Error
+        ? `Speichern fehlgeschlagen: ${error.message}`
+        : "Speichern fehlgeschlagen."
+    );
+  } finally {
+    setSaving(false);
   }
+}
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="mx-auto w-full max-w-7xl ">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm text-slate-600">Lade Termine...</p>
         </div>
@@ -396,13 +466,45 @@ export default function BookingsTable() {
 
   if (error) {
     return (
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 shadow-sm">
-          <p className="text-sm font-medium text-red-700">
-            Fehler beim Laden: {error}
-          </p>
+       <div className="hidden md:block">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full min-w-[1200px] text-sm">
+              <thead className="bg-slate-100 text-left text-xs uppercase tracking-wider text-slate-600">
+                <tr className="[&>th]:px-4 [&>th]:py-3">
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Status ändern</th>
+                  <th>Occasion</th>
+                  <th>Package</th>
+                  <th>Booking Type</th>
+                  <th>Region</th>
+                  <th>Location</th>
+                  <th>Exact Location</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Duration</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-200">
+                
+                  <tr
+                    className="align-top transition-colors odd:bg-white even:bg-slate-50 hover:bg-slate-100"
+                  >
+                    <div className="mx-auto w-full max-w-7xl">
+                      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 shadow-sm">
+                        <p className="text-sm font-medium text-red-700">
+                          Fehler beim Laden: {error}
+                        </p>
+                      </div>
+                    </div>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      
     );
   }
 
@@ -451,12 +553,7 @@ export default function BookingsTable() {
               active={statusFilter === "BESTÄTIGT"}
               onClick={() => setStatusFilter("BESTÄTIGT")}
             />
-            <StatusFilterButton
-              label="Completed"
-              count={counts.completed}
-              active={statusFilter === "completed"}
-              onClick={() => setStatusFilter("completed")}
-            />
+           
             <StatusFilterButton
               label="STORNIERT"
               count={counts.STORNIERT}
@@ -502,8 +599,8 @@ export default function BookingsTable() {
                 <InfoItem label="Region" value={row.region} />
                 <InfoItem label="Location" value={row.hall_or_location} />
                 <InfoItem label="Exact Location" value={row.exact_location} />
-                <InfoItem label="Start" value={formatDateTime(row.start_date)} />
-                <InfoItem label="End" value={formatDateTime(row.end_date)} />
+                <InfoItem label="Start" value={formatDateTime(row.startDate)} />
+                <InfoItem label="End" value={formatDateTime(row.endDate)} />
                 <InfoItem label="Created" value={formatDateTime(row.created_at)} />
                 <InfoItem label="Updated" value={formatDateTime(row.updated_at)} />
                 <InfoItem label="Duration" value={row.duration} />
@@ -602,10 +699,10 @@ export default function BookingsTable() {
                     <td className="px-4 py-3 text-slate-700">{row.hall_or_location}</td>
                     <td className="px-4 py-3 text-slate-700">{row.exact_location}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-slate-700">
-                      {formatDateTime(row.start_date)}
+                      {formatDateTime(row.startDate)}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-slate-700">
-                      {formatDateTime(row.end_date)}
+                      {formatDateTime(row.endDate)}
                     </td>
                     <td className="px-4 py-3 text-slate-700">{row.duration}</td>
                     <td className="min-w-[260px] px-4 py-3">
