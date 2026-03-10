@@ -48,8 +48,8 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="max-h-screen bg-neutral-200 dark:bg-neutral-700 overflow-hidden ">
-      <div className="container mx-auto h-full p-6 md:p-10">
+    <section className="max-h-screen bg-black dark:bg-neutral-700 overflow-hidden ">
+      <div className="container mx-auto h-full p-6 md:p-10 bg-black">
         <div className="flex min-h-screen items-center justify-center text-neutral-800 dark:text-neutral-200">
           <div className="w-full max-w-6xl">
             <div className="overflow-hidden rounded-lg bg-white shadow-lg dark:bg-neutral-800">
@@ -118,7 +118,7 @@ export default function LoginPage() {
                           className="mb-3 inline-block w-full rounded px-6 pb-2.5 pt-2 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:opacity-90 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
                           style={{
                             background:
-                              "linear-gradient(to right, #000000, #f7c910, #D4AF37)",
+                              "linear-gradient(to right, #000000, #34253f, #863453)",
                           }}
                         >
                           {loading ? "Logging in..." : "Log in"}
