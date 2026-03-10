@@ -25,7 +25,6 @@ export default function DashboardLayout() {
             </div>
           </main>
 
-          <Footer />
         </div>
       </div>
     </div>

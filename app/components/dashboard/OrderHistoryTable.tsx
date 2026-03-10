@@ -11,7 +11,8 @@ type OccasionType =
   | "SONSTIGES"
   | "HOCHZEIT"
   | "GEBURTSTAG";
-
+const token = localStorage.getItem("token");
+      console.log("token for creation:", token);  
 type TerminApi = {
   id: string;
   createdAt: string | null;
@@ -287,6 +288,9 @@ export default function BookingsTable() {
 
       const res = await fetch(`${API_BASE_URL}/api/termine`, {
         cache: "no-store",
+         headers: {
+        Authorization: `Bearer ${token}`,
+      },
       });
 
       if (!res.ok) {
@@ -540,13 +544,16 @@ export default function BookingsTable() {
         endDate: row.endDate || null,
       };
 
-      const res = await fetch(`${API_BASE_URL}/api/termine`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      
+
+        const res = await fetch(`${API_BASE_URL}/api/termine`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -598,10 +605,13 @@ export default function BookingsTable() {
         duration: row.duration,
       }));
 
+      const token = localStorage.getItem("token");
+
       const res = await fetch(`${API_BASE_URL}/api/termine/batch`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -628,7 +638,7 @@ export default function BookingsTable() {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="mx-auto h-full w-full max-w-7xl">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm text-slate-600">Lade Termine...</p>
         </div>

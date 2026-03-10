@@ -1,7 +1,5 @@
-import Image from "next/image";
-import Page from "./auth/signin/page";
+
+import { redirect } from "next/dist/client/components/navigation";
 export default function Home() {
-  return (
-    <Page />
-  );
+  redirect("/auth/signin");
 }
