@@ -38,7 +38,7 @@ export default function Sidebar() {
             <span className="ml-3">Overview</span>
           </a>
 
-          <a
+          {/* <a
             href="#"
             className="group flex items-center rounded-lg p-2 text-base font-normal text-gray-700 hover:bg-gray-100"
           >
@@ -178,7 +178,7 @@ export default function Sidebar() {
               />
             </svg>
             <span className="ml-3">Dashboard</span>
-          </a>
+          </a> */}
         </nav>
       </div>
     </div>

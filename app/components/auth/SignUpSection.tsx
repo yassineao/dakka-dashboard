@@ -48,9 +48,7 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="max-h-screen bg-neutral-200 dark:bg-neutral-700 overflow-hidden" style={{
-  background: "linear-gradient(to right, #000000, #6b5b1e, #D4AF37)",
-}}>
+    <section className="max-h-screen bg-neutral-200 dark:bg-neutral-700 overflow-hidden ">
       <div className="container mx-auto h-full p-6 md:p-10">
         <div className="flex min-h-screen items-center justify-center text-neutral-800 dark:text-neutral-200">
           <div className="w-full max-w-6xl">
@@ -120,7 +118,7 @@ export default function LoginPage() {
                           className="mb-3 inline-block w-full rounded px-6 pb-2.5 pt-2 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:opacity-90 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
                           style={{
                             background:
-                              "linear-gradient(to right, #000000, #5d6b1e, #D4AF37)",
+                              "linear-gradient(to right, #000000, #f7c910, #D4AF37)",
                           }}
                         >
                           {loading ? "Logging in..." : "Log in"}
@@ -137,11 +135,8 @@ export default function LoginPage() {
 
                 {/* Right column */}
                 <div
-                  className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-bl-none lg:rounded-r-lg"
-                  style={{
-                    background:
-                      "linear-gradient(c)",
-                  }}
+                  className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-bl-none lg:rounded-r-lg bg-[url('/background.jpg')] bg-cover bg-center"
+                  
                 >
                   <div className="px-6 py-10 text-white md:mx-6 md:p-12">
                    
