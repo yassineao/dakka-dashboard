@@ -1003,7 +1003,7 @@ export default function BookingsTable() {
 
         <div className="hidden md:block">
           <div className="w-full overflow-x-auto">
-            <table className="w-full min-w-[1500px] text-sm">
+            <table className="w-full min-w-[1500px] text-sm ">
               <thead className="bg-slate-100 text-left text-xs uppercase tracking-wider text-slate-600">
                 <tr className="[&>th]:px-4 [&>th]:py-3">
                   <th>Name</th>
@@ -1215,19 +1215,18 @@ export default function BookingsTable() {
                       )}
                     </td>
 
-                    <td className="min-w-[260px] px-4 py-3">
+                    <td className="w-[260px] max-w-[400px] px-4 py-3 align-top">
                       {row.isNew ? (
                         <textarea
                           value={row.description}
                           onChange={(e) =>
                             updateField(row.id, "description", e.target.value)
                           }
-                          className="w-full min-w-[240px] rounded-lg border border-slate-200 px-3 py-2 text-slate-700"
+                          className="h-24 w-full resize-none overflow-y-auto rounded-lg border border-slate-200 px-3 py-2 text-slate-700"
                           placeholder="Description"
-                          rows={2}
                         />
                       ) : (
-                        <div className="max-w-[260px] whitespace-normal text-slate-700">
+                        <div className="max-h-12 overflow-y-auto break-words pr-2 text-slate-700">
                           {row.description}
                         </div>
                       )}
