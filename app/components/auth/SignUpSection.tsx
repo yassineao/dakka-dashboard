@@ -48,7 +48,7 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="max-h-screen bg-black dark:bg-neutral-700 overflow-hidden ">
+    <section className="max-h-screen bg-black dark:bg-black overflow-hidden ">
       <div className="container mx-auto h-full p-6 md:p-10 bg-black">
         <div className="flex min-h-screen items-center justify-center text-neutral-800 dark:text-neutral-200">
           <div className="w-full max-w-6xl">
