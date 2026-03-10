@@ -4,6 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+function getToken() {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("token");
+}
+const token = getToken();
+
+
 type BookingStatus = "AUSSTEHEND" | "BESTÄTIGT" | "STORNIERT";
 type OccasionType =
   | "VERLOBUNG"
@@ -11,8 +18,8 @@ type OccasionType =
   | "SONSTIGES"
   | "HOCHZEIT"
   | "GEBURTSTAG";
-const token = localStorage.getItem("token");
-      console.log("token for creation:", token);  
+
+  
 type TerminApi = {
   id: string;
   createdAt: string | null;
