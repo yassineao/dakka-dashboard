@@ -11,6 +11,22 @@ export default function DashboardPage() {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
 
+  function hasToken() {
+    if (typeof window === "undefined") return false;
+    const token = localStorage.getItem("token");
+    return !!token;
+  }
+
+  function validateAuth() {
+    if (!hasToken()) {
+      setAuthorized(false);
+      router.replace("/auth/signin");
+      return;
+    }
+
+    setAuthorized(true);
+  }
+
   function renderComponent() {
     switch (activeComponent) {
       case "dashboard":
@@ -23,14 +39,25 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    validateAuth();
 
-    if (!token) {
-      router.replace("/auth/signin");
-      return;
-    }
+    const onStorage = () => {
+      validateAuth();
+    };
 
-    setAuthorized(true);
+    const onVisibilityChange = () => {
+      if (!document.hidden) {
+        validateAuth();
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, [router]);
 
   if (!authorized) {
@@ -39,7 +66,7 @@ export default function DashboardPage() {
 
   return (
     <div className="bg-white">
-      <div className="flex overflow-hidden bg-white pt-16">
+      <div className="flex overflow-hidden bg-white pt-0.25">
         <Sidebar onSelect={setActiveComponent} />
           {renderComponent()}
       </div>

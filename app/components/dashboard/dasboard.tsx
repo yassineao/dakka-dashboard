@@ -9,13 +9,15 @@ export default function DashboardLayout() {
   return (
      <div className="relative h-full w-full overflow-y-auto  lg:ml-64">
             <main>
+ <StatsCards />
               <div className="px-4 pt-6">
+                
+               
                 <div className="grid w-full grid-cols-1 gap-4">
                   {/* <TransactionsTable /> */}
                   <BookingsTable />
                 </div>
   
-                <StatsCards />
               </div>
             </main>
   
