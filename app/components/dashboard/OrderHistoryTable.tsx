@@ -29,6 +29,7 @@ type TerminApi = {
   status: string | null;
   exactLocation: string | null;
   hallOrLocation: string | null;
+  phoneNumber: string | null;
   name: string | null;
   occasion: OccasionType | "";
   packageName: string | null;
@@ -47,6 +48,7 @@ type BookingRow = {
   status: BookingStatus;
   exact_location: string;
   hall_or_location: string;
+  phone_number: string;
   name: string;
   occasion: OccasionType | "";
   package_name: string;
@@ -153,6 +155,7 @@ function mapTerminToBookingRow(termin: TerminApi): BookingRow {
     status: mapApiStatus(termin.status),
     exact_location: termin.exactLocation ?? "-",
     hall_or_location: termin.hallOrLocation ?? "-",
+    phone_number: termin.phoneNumber ?? "-",
     name: termin.name ?? "-",
     occasion: termin.occasion ?? "-",
     package_name: termin.packageName ?? "-",
@@ -175,6 +178,7 @@ function createEmptyBookingRow(): BookingRow {
     status: "AUSSTEHEND",
     exact_location: "",
     hall_or_location: "",
+    phone_number: "",
     name: "",
     occasion: "SONSTIGES",
     package_name: "",
@@ -348,6 +352,7 @@ export default function BookingsTable() {
           row.status,
           row.exact_location,
           row.hall_or_location,
+          row.phone_number,
           row.occasion,
           row.package_name,
           row.booking_type,
@@ -378,6 +383,7 @@ export default function BookingsTable() {
         row.status,
         row.exact_location,
         row.hall_or_location,
+        row.phone_number,
         row.occasion,
         row.package_name,
         row.booking_type,
@@ -541,6 +547,7 @@ export default function BookingsTable() {
         status: row.status,
         exactLocation: row.exact_location || null,
         hallOrLocation: row.hall_or_location || null,
+        phoneNumber: row.phone_number || null,
         occasion: row.occasion || null,
         packageName: row.package_name || null,
         bookingType: row.booking_type || null,
@@ -604,6 +611,7 @@ export default function BookingsTable() {
         status: row.status,
         exactLocation: row.exact_location,
         hallOrLocation: row.hall_or_location,
+        phoneNumber: row.phone_number,
         occasion: row.occasion,
         packageName: row.package_name,
         bookingType: row.booking_type,
@@ -868,6 +876,19 @@ export default function BookingsTable() {
 
                     <div>
                       <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Telefonnummer
+                      </label>
+                      <input
+                        value={row.phone_number}
+                        onChange={(e) =>
+                          updateField(row.id, "phone_number", e.target.value)
+                        }
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
                         Exact Location
                       </label>
                       <input
@@ -939,6 +960,7 @@ export default function BookingsTable() {
                     <InfoItem label="Booking Type" value={row.booking_type} />
                     <InfoItem label="Region" value={row.region} />
                     <InfoItem label="Location" value={row.hall_or_location} />
+                    <InfoItem label="Telefonnummer" value={row.phone_number} />
                     <InfoItem label="Exact Location" value={row.exact_location} />
                     <InfoItem label="Start" value={formatDateTime(row.startDate)} />
                     <InfoItem label="End" value={formatDateTime(row.endDate)} />
@@ -1014,6 +1036,7 @@ export default function BookingsTable() {
                   <th>Booking Type</th>
                   <th>Region</th>
                   <th>Location</th>
+                  <th>Phone</th>
                   <th>Exact Location</th>
                   <th>Start</th>
                   <th>End</th>
@@ -1040,6 +1063,21 @@ export default function BookingsTable() {
                         />
                       ) : (
                         <div className="font-semibold text-slate-900">{row.name}</div>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3 text-slate-700">
+                      {row.isNew ? (
+                        <input
+                          value={row.phone_number}
+                          onChange={(e) =>
+                            updateField(row.id, "phone_number", e.target.value)
+                          }
+                          className="w-full min-w-[140px] rounded-lg border border-slate-200 px-3 py-2"
+                          placeholder="Telefonnummer"
+                        />
+                      ) : (
+                        row.phone_number
                       )}
                     </td>
 
@@ -1262,7 +1300,7 @@ export default function BookingsTable() {
                 {paginatedRows.length === 0 && (
                   <tr>
                     <td
-                      colSpan={14}
+                      colSpan={15}
                       className="px-4 py-10 text-center text-sm text-slate-500"
                     >
                       Keine Einträge gefunden.
